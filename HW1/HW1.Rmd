@@ -1,0 +1,107 @@
+---
+title: 'DSO 545: HW 1'
+author: "Bradley Rava, Patrick Vossler, Simeng Shao"
+date: "1/27/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(here)
+
+```
+
+Load the data:
+```{r}
+baggage = read.csv(here("Baggage.csv"), header=T,stringsAsFactors = F)
+indus_med = read.csv(here("IndustryMedians.csv"),header=T)
+head(baggage)
+```
+
+Process data:
+```{r}
+baggage$Date = as.Date(paste0("02/",baggage$Date),"%d/%m/%Y")
+baggage$Month = factor(baggage$Month,labels=c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"))
+baggage$Airline = as.character(baggage$Airline)
+```
+
+## 1. Explore baggage complaints over time: create 3 time series plots for the variable *Baggage* by Date for each of the airlines separately.
+```{r}
+airlines = unique(baggage$Airline)
+for(i in 1:length(airlines)){
+    airline = airlines[i]
+    data = baggage[baggage$Airline == airline,]
+    res = aggregate(data["Baggage"], by=list(Month = data$Month), sum)
+    plot(x=as.integer(res$Month),y=res$Baggage,type="o",xaxt="n",xlab="Month", ylab="Number of Baggage Complaints")
+    axis(1,at = seq(1,12),labels = levels(res$Month))
+    title(paste(airline,"Baggage Complaints (2004-2010)"))
+    
+}
+```
+
+## 2. Briefly describe what patterns you see in the plots
+In some of the plots we see a cyclical pattern with the number of baggage complaints increasing during the winter holiday travel season (November-January). There is often another spike in baggage complaints in the summer likely when families are going on summer vacations.
+
+* American Eagle
+    * We see that the cyclical yearly trend described above holds for American Eagle. Furthermore we see that there is an increase in the total number of complaints in 2006-2008 and then the number of complaints drops back down from 2009 onward.
+* Hawaiian Airlines
+    * Compared to American Eagle, Hawaiian Airlines has a smaller number of complaints each month. This is expected because Hawaiian Airlines is a smaller airline compared to American Eagle. Whereas American Eagle had a spike in baggage complaints during the winter holiday travel season, Hawaiian Airlines seems to have spikes in baggage complaints during the Spring and Summer. This perhaps could be because they see an influx of passengers wishing to travel to Hawaii during the Spring and Summer months.
+    * The most concerning trend for Hawaiian Airlines is the trend of larger spikes in each of the successive years, culminating with a large spike in baggage complaints during the 2010 holiday season.
+* United Airlines
+    * Unsurprisingly United Airlines has a larger number of baggage complaints overall which can be explained by its much larger size compared to the other two companies.
+    * Like American Eagle we see that United Airlines also experiences a surge in baggage claims during the holiday season. Additionally, it is interesting that both American Eagle and United Airlines have a spike in baggage complaints during 2006. Perhaps there was some external event that caused this for both airlines?
+    * Since both American Eagle and United Airlines provide a variety of flights to domestic destinations it is not surprising to see that they have similar baggage complaint patterns in the summer and winter months.
+
+## 3.
+```{r}
+airlines = unique(baggage$Airline)
+for(i in 1:length(airlines)){
+    airline = airlines[i]
+    data = baggage[baggage$Airline == airline,]
+    res = aggregate(data["Baggage"], by=list(Month = data$Month, Year = data$Year), sum)
+    years = unique(data$Year)
+    plot_dat = res[res$Year == years[1],]
+    
+    #bottom,left,top,right margin
+    par(mar=c(7.1, 4.1, 3.1, 8.9), xpd=TRUE)
+
+    plot(x=as.integer(plot_dat$Month),y=plot_dat$Baggage,type="o",xaxt="n",xlab="", ylab="Number of Baggage Complaints",lty=1, col=1, pch = 1,ylim = c(min(res$Baggage),max(res$Baggage)))
+    axis(1,at = seq(1,12),labels = levels(res$Month))
+    title(paste(airline,"Baggage Complaints"))   
+    for(j in 1:length(years)){
+        plot_dat = res[res$Year == years[j],]
+        lines(x=as.integer(plot_dat$Month),y=plot_dat$Baggage,type="o",lty=j, col=j,pch=j)
+        
+    }
+    legend("topright", inset=c(-0.2,0), legend=years, pch=1:length(years),lty=1:length(years),col=1:length(years), title="Years")
+    
+    
+}
+```
+
+## 4. Describe the patterns in the plot
+
+## 5. Plot all three airline Baggage data by Date on one graph.
+```{r}
+# Maybe do this on the log scale?
+airlines = unique(baggage$Airline)
+airline = airlines[1]
+
+total_aggregated = aggregate(baggage["Baggage"], by=list(Month = baggage$Month,Airline=baggage$Airline), sum)
+
+data = baggage[baggage$Airline == airline,]
+res = aggregate(data["Baggage"], by=list(Month = data$Month), sum)
+par(mar=c(7.1, 4.1, 3.1, 8.9), xpd=TRUE)
+plot(x=as.integer(res$Month),y=res$Baggage,type="o",xaxt="n",xlab="Month", ylab="Number of Baggage Complaints",lty=1, col=1, pch = 1,ylim= c(0,max(total_aggregated$Baggage)))
+axis(1,at = seq(1,12),labels = levels(res$Month))
+title("Baggage Complaints for all 3 Airlines (2004-2010)")
+for(i in 2:length(airlines)){
+    airline = airlines[i]
+    data = baggage[baggage$Airline == airline,]
+    plot_dat = aggregate(data["Baggage"], by=list(Month = data$Month), sum)
+    lines(x=as.integer(plot_dat$Month),y=plot_dat$Baggage,type="o",lty=i, col=i,pch=i)
+}
+legend("topright", inset=c(-0.375,0), legend=airlines, pch=1:length(airlines),lty=1:length(airlines),col=1:length(airlines), title="Airlines")
+
+```
+
