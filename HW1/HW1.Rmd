@@ -126,7 +126,7 @@ Create monthly averages over total data and plot lm
 
 Load CEO compensation data
 ```{r}
-ceo_comp = read.table(here("HW1","CEOcompensation.txt"),header=T,sep = "\t")
+#ceo_comp = read.table(here("HW1","CEOcompensation.txt"),header=T,sep = "\t")
 ```
 
 
