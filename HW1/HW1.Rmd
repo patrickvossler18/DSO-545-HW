@@ -16,6 +16,7 @@ Load the data:
 baggage = read.csv(here("HW1", "Baggage.csv"), header=T,stringsAsFactors = F)
 indus_med = read.csv(here("HW1","IndustryMedians.csv"),header=T)
 head(baggage)
+print("Hello Brad's Test")
 ```
 
 Process data:
