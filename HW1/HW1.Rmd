@@ -13,6 +13,7 @@ library(here)
 
 Load the data:
 ```{r}
+
 baggage = read.csv(here("HW1", "Baggage.csv"), header=T,stringsAsFactors = F)
 indus_med = read.csv(here("HW1","IndustryMedians.csv"),header=T)
 head(baggage)
@@ -108,6 +109,17 @@ legend("topright", inset=c(-0.375,0), legend=airlines, pch=1:length(airlines),lt
 
 ```
 
+## 6. Based on the graph in question 5., do some airlines have better baggage handling practices?
+According to the plot, Hawaiian line seems to have much smaller baggage complaints throughout 2004-2010, which has been below 50000. Other two lines, however, are above 50000.
+
+## 7.	Based on the graph in question 5., which airline has the best record? The worst?
+Based on the graph, Hawaiian has the best record, United has the worst record.
+
+
+## 8.	Based on the graph in question 5., are complaints getting better or worse over time?
+
+## 9.	Are the conclusions, you have drawn based on the graphs of the raw data you created, accurate? Are there any potential factors that may distort your conclusions and should be taken into consideration?
+
 ## 12. Create **Baggage %** KPI
 ```{r}
 baggage$Baggage_perc = baggage$Baggage / baggage$Enplaned * 100
@@ -126,7 +138,7 @@ Create monthly averages over total data and plot lm
 
 Load CEO compensation data
 ```{r}
-ceo_comp = read.table(here("HW1","CEOcompensation.txt"),header=T,sep = "\t")
+#ceo_comp = read.table(here("HW1","CEOcompensation.txt"),header=T,sep = "\t")
 ```
 
 
@@ -134,4 +146,3 @@ ceo_comp = read.table(here("HW1","CEOcompensation.txt"),header=T,sep = "\t")
 ```{r}
 
 ```
-
