@@ -13,8 +13,8 @@ library(here)
 
 Load the data:
 ```{r}
-baggage = read.csv(here("Baggage.csv"), header=T,stringsAsFactors = F)
-indus_med = read.csv(here("IndustryMedians.csv"),header=T)
+baggage = read.csv(here("HW1", "Baggage.csv"), header=T,stringsAsFactors = F)
+indus_med = read.csv(here("HW1","IndustryMedians.csv"),header=T)
 head(baggage)
 ```
 
