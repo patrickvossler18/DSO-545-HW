@@ -91,19 +91,21 @@ airline = airlines[1]
 total_aggregated = aggregate(baggage["Baggage"], by=list(Date = baggage$Date,Airline=baggage$Airline), sum)
 
 res = total_aggregated[baggage$Airline == airline,]
-
+res_ts = ts(res$Baggage, frequency = 12, start = 2004)
+tsp = attributes(res_ts)$tsp
+dates = seq(as.Date("2004-01-02"), by = "month", along = res_ts)
 
 
 par(mar=c(7.1, 4.1, 3.1, 8.9), xpd=TRUE)
 
-plot(x=res$Date,y=res$Baggage,type="o",xaxt="n",xlab="Month", ylab="Number of Baggage Complaints",lty=1, col=1, pch = 1,ylim= c(0,max(total_aggregated$Baggage)))
-
-axis(1, res$Date, format(res$Date, "%b %d"))
+#plot(x=res$Date,y=res$Baggage,type="o",xaxt="n",xlab="Month", ylab="Number of Baggage Complaints",lty=1, col=1, pch = 1,ylim= c(0,max(total_aggregated$Baggage)))
+plot(res_ts,type="o",xaxt="n",xlab="Month", ylab="Number of Baggage Complaints",lty=1, col=1, pch = 1,ylim= c(0,max(total_aggregated$Baggage)))+ axis(1, at = seq(tsp[1], tsp[2], along = res_ts), labels = format(dates, "%Y-%m"))
 title("Baggage Complaints for all 3 Airlines (2004-2010)")
 for(i in 2:length(airlines)){
     airline = airlines[i]
     res = total_aggregated[baggage$Airline == airline,]
-    lines(x=res$Date,y=res$Baggage,type="o",lty=i, col=i,pch=i)
+    res_ts = ts(res$Baggage, frequency = 12, start = 2004)
+    lines(res_ts,type="o",lty=i, col=i,pch=i)
 }
 legend("topright", inset=c(-0.375,0), legend=airlines, pch=1:length(airlines),lty=1:length(airlines),col=1:length(airlines), title="Airlines")
 
@@ -117,21 +119,158 @@ Based on the graph, Hawaiian has the best record, United has the worst record.
 
 
 ## 8.	Based on the graph in question 5., are complaints getting better or worse over time?
+There is no clear pattern that the curves are going up or down, in fact they all once increase and fluctuate back to the level where they started with. So based on the graph the complaints are not getting better nor wose.
 
 ## 9.	Are the conclusions, you have drawn based on the graphs of the raw data you created, accurate? Are there any potential factors that may distort your conclusions and should be taken into consideration?
+The conclusions are not necessarily accurate since we only looked at the number of baggage complains of the three airlines. Chances are that Hawaiian is a smaller airline and have way fewer passengers than United or American Eagle. So we look at the ratio of (# of complaints)/(# of boarded passengers), i.e., "baggage"/"enplaned" in our dataset.
 
-## 12. Create **Baggage %** KPI
+## 10.	Report the average of scheduled flights and the average of enplaned passengers by airline. 
+```{r}
+mean_scheduled = rep(0, length(unique(airlines)))
+names(mean_scheduled) = unique(airlines)
+for(i in 1:length(unique(airlines)))
+{
+  mean_scheduled[i] = mean(baggage[baggage$Airline == airlines[i],6])
+}
+```
+
+```{r}
+mean_enplaned = rep(0, length(unique(airlines)))
+names(mean_enplaned) = unique(airlines)
+for(i in 1:length(unique(airlines)))
+{
+  mean_enplaned[i] = mean(baggage[baggage$Airline == airlines[i],8])
+}
+```
+
+The average of scheduled flights are:
+```{r}
+mean_scheduled
+```
+
+The average of enplaned passengers are:
+```{r}
+mean_enplaned
+```
+
+## 11. What insights, ideas, and concerns does the data in the table in 10. provide you with?
+The number of scheduled planes and enplaned passengers of United and Hawaiian are not on the same scale. Again this confirms our concern in problem 9 that simply looking at the number of complains is not fair for assessing the baggage handling practices of these companies.
+
+## 12. Create **Baggage %** KPI that adjusts the total number of passenger complaints for size
 ```{r}
 baggage$Baggage_perc = baggage$Baggage / baggage$Enplaned * 100
+
+mean_kpi = rep(0, length(unique(airlines)))
+names(mean_kpi) = unique(airlines)
+for(i in 1:length(unique(airlines)))
+{
+  mean_kpi[i] = mean(baggage[baggage$Airline == airlines[i],9])
+}
 ```
+
+The average Baggage % for each airline are:
+```{r}
+for(i in 1: length(unique(airlines)))
+  print(paste(unique(airlines), round(mean_kpi*100,2),"%")[i])
+
+```
+
+## 13.	Do the results in question 12 support your previous conclusions? Briefly explain.
+The results in question 12 show that Hawaiian has the lowest **Baggage %**, United is the second; while American Eagle has the highest **Baggage %**. This result contradicts with our previous conclusions in that the worst baggage handling records belongs to American Eagle instead of United.
+
+## 14.	Superimpose all three time series on one graph to display Baggage % by Date.
+
+
+```{r}
+
+airlines = unique(baggage$Airline)
+airline = airlines[1]
+
+perc_aggregated = aggregate(baggage["Baggage_perc"], by=list(Date = baggage$Date,Airline=baggage$Airline), sum)
+
+res = perc_aggregated[perc_baggage$Airline == airline,]
+res_ts = ts(res$Baggage_perc, frequency = 12, start = 2004)
+tsp = attributes(res_ts)$tsp
+dates = seq(as.Date("2004-01-02"), by = "month", along = res_ts)
+
+
+par(mar=c(7.1, 4.1, 3.1, 8.9), xpd=TRUE)
+
+plot(res_ts,type="o",xaxt="n",xlab="Month", ylab="Number of Baggage %",lty=1, col=1, pch = 1,ylim= c(0,max(perc_aggregated$Baggage_perc)))+ axis(1, at = seq(tsp[1], tsp[2], along = res_ts), labels = format(dates, "%Y-%m"))
+title("Baggage % for all 3 Airlines (2004-2010)")
+for(i in 2:length(airlines)){
+    airline = airlines[i]
+    res = perc_aggregated[perc_baggage$Airline == airline,]
+    res_ts = ts(res$Baggage_perc, frequency = 12, start = 2004)
+    lines(res_ts,type="o",lty=i, col=i,pch=i)
+}
+legend("topright", inset=c(-0.375,0), legend=airlines, pch=1:length(airlines),lty=1:length(airlines),col=1:length(airlines), title="Airlines")
+
+```
+
+## 15.	In addition to the graph in question 14., would plotting each series on a separate graph be beneficial and why? Create a graph to support your answer.  
+
+```{r}
+
+airlines = unique(baggage$Airline)
+for(i in 1:length(airlines))
+{
+  airline = airlines[i]
+  perc_aggregated = aggregate(baggage["Baggage_perc"], by=list(Date = baggage$Date,Airline=baggage$Airline), sum)
+  res = perc_aggregated[perc_baggage$Airline == airline,]
+  
+  
+  
+  res = perc_aggregated[baggage$Airline == airline,]
+  res_ts = ts(res$Baggage_perc, frequency = 12, start = 2004)
+  tsp = attributes(res_ts)$tsp
+  dates = seq(as.Date("2004-01-02"), by = "month", along = res_ts)
+
+
+  par(mar=c(7.1, 4.1, 3.1, 8.9), xpd=TRUE)
+
+  plot(res_ts,type="o",xaxt="n",xlab="Month", ylab="Number of Baggage %",lty=1, col=1, pch = 1,ylim=c(0,max(res$Baggage_perc)))+ axis(1, at = seq(tsp[1], tsp[2], along = res_ts), labels = format(dates, "%Y-%m"))
+  title(paste0("Baggage % for ", airline,  " (2004-2010)"))
+}
+
+```
+
+Plotting each series on a separate graph is beneficial because this way we can pay a closer look to how every curve fluctuated. In the previous plot, since the range for American Eagle is too big, it is hard to tell how the curve of Hawaiian changed over time.
+
+## 16.	Based on the analysis of  KPI Baggage %, have any of your conclusions drawn in questions 6. - 8. changed? Briefly discuss.
+The conclusion for the best service and worst service has been changed. If we look at the KPI Baggage %, we would find that Hawaiian still has the best service, whilst American Eagle has the worst service.
+
+How complaints are changing over time remains non-significant. For United the Baggage % level seems pretty stable; For American Eagle Baggage % seems to rise up and fall back to the begining level; for Hawaiian it seems that the Baggage % once seems to drop but at the end of 2010 it increases rapid to the highest level. Therefore, by the current data we cannot tell whether the complaints level are becoming better or worse.
 
 
 ## 17. Superimpose time series plots of monthly averages of **Baggage %** by time for the three airlines
-Plot the mean of each month for all of the years
+```{r}
 
+airlines = unique(baggage$Airline)
+airline = airlines[1]
+
+perc_averaged= aggregate(baggage["Baggage_perc"], by=list(Date = baggage$Month,Airline=baggage$Airline), mean)
+res = perc_averaged[perc_averaged$Airline == airline,]
+plot(x=1:12, y=res$Baggage_perc, type="o",xlab="Month", ylab="Month Average of Baggage %",lty=1, col=1, pch = 1,ylim= c(0,max(perc_averaged$Baggage_perc)))
+
+title("Monthly Averages of Baggage % for all 3 Airlines (2004-2010)")
+for(i in 2:length(airlines)){
+    airline = airlines[i]
+    res = perc_averaged[perc_averaged$Airline == airline,]
+    lines(res$Baggage_perc,type="o",lty=i, col=i,pch=i)
+}
+legend("topright", inset=c(-0.375,0), legend=airlines, pch=1:length(airlines),lty=1:length(airlines),col=1:length(airlines), title="Airlines")
+
+```
+
+## 18.	Discuss common patterns all three time series exhibit in question 17.
+The common patterns that all three series share are as follows:
+The Baggage % begins to drop during the first 4-5 months, then it will hit the highest point in June, and stay at a high level till August, then it will continue dropping before it soars in Nov.-Dec.
 
 ## 19. Create a timeplot of **Baggage %**, add average line for **Baggage %** and a trendline of monthly average **Baggage %** for each airline.
 Create monthly averages over total data and plot lm
+
+## 20.	Prepare a brief (one paragraph) executive summary of your findings.  
 
 
 # Case 2: CEO Compensation
