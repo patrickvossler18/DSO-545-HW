@@ -136,13 +136,56 @@ Create monthly averages over total data and plot lm
 
 # Case 2: CEO Compensation
 
-Load CEO compensation data
+Load CEO compensation data. Using a csv form of the data because I was getting an error when trying to read the tab separated file
 ```{r}
-#ceo_comp = read.table(here("HW1","CEOcompensation.txt"),header=T,sep = "\t")
+ceo_comp = read.csv(here("HW1","CEOcompensation.csv"),header=T)
 ```
 
 
 ## 1. What is the number of female CEOs?
 ```{r}
-
+nrow(ceo_comp[ceo_comp$Gender=="F",])
 ```
+
+
+## 2. What is the age of the youngest CEO?
+```{r}
+min(ceo_comp$Age)
+```
+
+## 3. What is the age of the oldest CEO?
+```{r}
+max(ceo_comp$Age)
+```
+
+## 4. What is the average age of a CEO?
+```{r}
+round(mean(ceo_comp$Age),2)
+```
+## 5. What is the total CEO 2008 salary?
+```{r}
+round(sum(ceo_comp$X2008.Salary),2)
+```
+
+## 6. How many CEOs have joined a company as a CEO?
+So they weren't a founder and they weren't at the company before becoming the CEO
+```{r}
+# sum(ceo_comp$Founder == "No" & ceo_comp$Years.as.company.CEO == ceo_comp$Years.with.company)
+sum(ceo_comp$Years.as.company.CEO == ceo_comp$Years.with.company)
+```
+
+## 7. What is the average amount of time a CEO worked for a company before becoming a CEO?
+```{r}
+worked_before = ceo_comp[ceo_comp$Years.with.company > ceo_comp$Years.as.company.CEO,]
+round(mean(worked_before$Years.with.company - worked_before$Years.as.company.CEO),2)
+```
+
+
+## 8. Which industry in the data set has the largest number of CEO's
+```{r}
+which.max(table(ceo_comp$Industry))
+```
+Oil & Gas Operations has the largest number of CEO's in the data set
+
+
+
