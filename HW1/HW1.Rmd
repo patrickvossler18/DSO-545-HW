@@ -13,10 +13,9 @@ library(here)
 
 Load the data:
 ```{r}
-baggage = read.csv(here("HW1", "Baggage.csv"), header=T,stringsAsFactors = F)
+baggage = read.csv(here("HW1", "Baggage.csv"), header=T, stringsAsFactors = F)
 indus_med = read.csv(here("HW1","IndustryMedians.csv"),header=T)
 head(baggage)
-print("Hello Brad's Test")
 ```
 
 Process data:
@@ -106,3 +105,149 @@ legend("topright", inset=c(-0.375,0), legend=airlines, pch=1:length(airlines),lt
 
 ```
 
+
+## Case 2: CEO Compensation
+
+```{r case 2 load data}
+x <- read.table(here("HW1", "CEOcompensation.txt"), header = T, sep = "\t", quote = "\"", row.names = 1)
+head(x)
+```
+
+\textbf{Question 1:} What is the number of female CEO's?
+
+```{r question 1}
+num.ceo.f <- length(x$CEO[x$Gender == "F"])
+print(paste("The number of female CEO's is", num.ceo.f))
+```
+
+\textbf{Question 2:} What is the age of the youngest CEO?
+
+```{r question 2}
+age.ceo.min <- min(x$Age)
+print(paste("The age of the youngest CEO is", age.ceo.min))
+```
+
+\textbf{Question 3:} What is the age of the oldest CEO?
+
+```{r question 3}
+age.ceo.max <- max(x$Age)
+print(paste("The age of the oldest CEO is", age.ceo.max))
+```
+
+\textbf{Question 4:} What is the average age of a CEO?
+
+```{r question 4}
+age.ceo.avg <- round(mean(x$Age), 2)
+print(paste("The average age of a CEO is", age.ceo.avg))
+```
+
+\textbf{Question 5:} What is the total CEO 2008 salary?
+```{r question 5}
+tot.2008.sal <- sum(x$X2008.Salary)
+print(paste("The total CEO 2008 salary is", paste0(tot.2008.sal,"0"), "million"))
+```
+
+\textbf{Question 6:} How many CEOs have joined a company as a CEO? (Hint: CEOs can always be founders. Founders can’t always be CEOs)
+
+```{r question 6}
+## Here we claim that a CEO joined the company as a CEO if the number of years she was at the company equals the number of years she has been CEO.
+
+yearCheck <- sum(x$Years.as.company.CEO == x$Years.with.company)
+print(paste(yearCheck, "CEO's joined a company as a CEO"))
+```
+
+\textbf{Question 7:} What is the average amount of time a CEO worked for a company before becoming a CEO? (Use two decimal digit precision)
+
+```{r question 7}
+beforeCEO <- round(mean(x$Years.with.company - x$Years.as.company.CEO), 2)
+print(paste("The average amount of time a CEO worked for a company before becoming a CEO is", beforeCEO, "years"))
+```
+
+\textbf{Question 8:} Which industry in the data set has largest number CEO’s?
+
+```{r question 8}
+numCEO <- aggregate(x$CEO, list(Industry = x$Industry), FUN = length)
+industry.max.ceo <- numCEO[[1]][which(numCEO[[2]] == max(numCEO[[2]]))]
+print(paste("The industry with the largest number of CEO's is", industry.max.ceo))
+```
+
+\textbf{Question 9:} What is the average CEO 2008 Compensation? Note that 2008 compensation for a CEO consists of a total four components: Salary, Bonus, other (including vested restricted stock grants, LTIP (long-term incentive plan) payouts, and perks), and stock gains. (Use two decimal digit precision)
+
+```{r question 9}
+totCompensation <- round(mean(x$X2008.Salary + x$X2008.Bonus + x$X2008.Other + x$X2008.Stock.gains), 2)
+print(paste("The average CEO 2008 Compensation is", totCompensation, "million"))
+```
+
+\textbf{Question 10:} Which CEO did get paid the largest compensation amount in 2008?
+
+```{r question 10:}
+ceoCompensation <- x$X2008.Salary + x$X2008.Bonus + x$X2008.Other + x$X2008.Stock.gains
+maxCompensation <- which(ceoCompensation == max(ceoCompensation))
+print(paste("The CEO with the largest compensation amount in 2008 is", x$CEO[maxCompensation]))
+```
+
+\textbf{Question 11:} What is the corresponding amount? (Use two decimal digit precision)
+
+```{r question 11:}
+ceoCompensation <- x$X2008.Salary + x$X2008.Bonus + x$X2008.Other + x$X2008.Stock.gains
+print(paste("The corresponding amount is", max(ceoCompensation), "million"))
+```
+
+\textbf{Question 12:} Which industry does correspond to the second largest total CEO compensation in 2008? (Hint:check sort(), order () functions).
+
+```{r question 12}
+ceoCompensation <- x$X2008.Salary + x$X2008.Bonus + x$X2008.Other + x$X2008.Stock.gains
+secondMaxCompensation <- which(ceoCompensation == tail(sort(ceoCompensation), 2)[1])
+print(paste("The industry with the second largest total CEO compensation is", x$Industry[secondMaxCompensation]))
+```
+
+\textbf{Question 13:} Consider the following age groups: [45 – 50), [50 – 55), [55 – 60), [60 – 70), and [70 or more). Analyze age groups by industry and determine which age group corresponds to largest CEO average salary in 2008? Hint: 1. left end point is included; 2. nested if helps assign age category
+
+```{r question 13}
+ageGroups <- vector(mode="numeric", length=nrow(x))
+ageGroups[which(x$Age >= 45 & x$Age < 50)] <- 1
+ageGroups[which(x$Age >= 50 & x$Age < 55)] <- 2
+ageGroups[which(x$Age >= 55 & x$Age < 60)] <- 3
+ageGroups[which(x$Age >= 60 & x$Age < 70)] <- 4
+ageGroups[which(x$Age >= 70)] <- 5
+x$ageGroups <- ageGroups
+
+groupByIndustry <- aggregate(x$X2008.Salary, list(ageGroups = x$ageGroups, 
+                               industry = x$Industry), mean)
+groupByAge <- as.matrix(aggregate(x$X2008.Salary, list(ageGroups = x$ageGroups), mean))
+
+print(paste("The age group that has the highest average salary is group", groupByAge$ageGroups[which(groupByAge$x == max(groupByAge$x))],"which corresponds to [70 or more)"))
+
+print(paste("This corresponded to the industry of", groupByIndustry$industry[which(groupByIndustry$x == max(groupByIndustry$x))], "where the salary was", max(groupByIndustry$x), "million"))
+
+## Import median data
+y <- read.csv("IndustryMedians.csv")
+
+## Calculate percent difference for each CEO
+z <- cbind.data.frame(ceoCompensation, industry=x$Industry)
+  
+x$percentDiff <- sapply(1:nrow(z), function(i) {
+  compensation <- z$ceoCompensation[i]
+  indMed <- y$Total.compensation[which(y$Industry == z$industry[i])]
+  return( (compensation - indMed) / indMed*100)
+})
+
+## Look at the percent difference for each CEO
+print(x$percentDiff)
+hist(x$percentDiff, main = "Percent Difference for each CEO", xlab = "Percent Difference")
+```
+
+\textbf{Question 14:} How many CEO’s have received 100% or larger compensation relative to their respective median compensation?
+
+```{r question 14}
+numLarger <- length(which(x$percentDiff > 100))
+print(paste("The number of CEO's that recieved 100% or larger compensation relative to their respective median compensation is", numLarger))
+```
+
+\textbf{Question 15:} Is the following formula always true? 
+
+```{r question 15}
+y$totalMedianCompensation <- y$Salary + y$Bonus + y$Other + y$Stock.Gains
+
+print(paste("There are a total of", length(which(y$totalMedianCompensation != y$Total.compensation)), "where the total median compensation formula does not match our given total median compensation. This means the formula is not always true."))
+```
