@@ -1,5 +1,5 @@
 ## ----setup, include=FALSE------------------------------------------------
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = F)
 library(here)
 
 
@@ -253,37 +253,6 @@ title(paste0("Baggage % for ", airline,  " (2004-2010)"))
 
 airlines = unique(baggage$Airline)
 airline = airlines[1]
-
-perc_averaged= aggregate(baggage["Baggage_perc"], by=list(Date = baggage$Month,Airline=baggage$Airline), mean)
-res = perc_averaged[perc_averaged$Airline == airline,]
-plot(x=1:12, y=res$Baggage_perc, type="o",xlab="Month", ylab="Month Average of Baggage %",lty=1, col=1, pch = 1,ylim= c(0,max(perc_averaged$Baggage_perc)))
-
-title("Monthly Averages of Baggage % for all 3 Airlines (2004-2010)")
-for(i in 2:length(airlines)){
-    airline = airlines[i]
-    res = perc_averaged[perc_averaged$Airline == airline,]
-    lines(res$Baggage_perc,type="o",lty=i, col=i,pch=i)
-}
-legend("topright", inset=c(-0.375,0), legend=airlines, pch=1:length(airlines),lty=1:length(airlines),col=1:length(airlines), title="Airlines")
-
-## ------------------------------------------------------------------------
-airline = airlines[2]
-
-perc_averaged= aggregate(baggage["Baggage_perc"], by=list(Date = baggage$Month,Airline=baggage$Airline), mean)
-res = perc_averaged[perc_averaged$Airline == airline,]
-plot(x=1:12, y=res$Baggage_perc, type="o",xlab="Month", ylab="Month Average of Baggage %",lty=1, col=1, pch = 1,ylim= c(0,max(perc_averaged$Baggage_perc)))
-
-title("Monthly Averages of Baggage % for all 3 Airlines (2004-2010)")
-for(i in 2:length(airlines)){
-    airline = airlines[i]
-    res = perc_averaged[perc_averaged$Airline == airline,]
-    lines(res$Baggage_perc,type="o",lty=i, col=i,pch=i)
-}
-legend("topright", inset=c(-0.375,0), legend=airlines, pch=1:length(airlines),lty=1:length(airlines),col=1:length(airlines), title="Airlines")
-
-## ------------------------------------------------------------------------
-airline = airlines[3]
-
 perc_averaged= aggregate(baggage["Baggage_perc"], by=list(Date = baggage$Month,Airline=baggage$Airline), mean)
 res = perc_averaged[perc_averaged$Airline == airline,]
 plot(x=1:12, y=res$Baggage_perc, type="o",xlab="Month", ylab="Month Average of Baggage %",lty=1, col=1, pch = 1,ylim= c(0,max(perc_averaged$Baggage_perc)))
@@ -298,42 +267,38 @@ legend("topright", inset=c(-0.375,0), legend=airlines, pch=1:length(airlines),lt
 
 ## ------------------------------------------------------------------------
 airlines = unique(baggage$Airline)
-airline = airlines[1]
-data = baggage[baggage$Airline == airline,]
-res = aggregate(data["Baggage_perc"], by=list(Month = data$Month, Year = data$Year), sum)
-years = unique(data$Year)
-plot_dat = res[res$Year == years[1],]
-
-#bottom,left,top,right margin
-par(mar=c(7.1, 4.1, 3.1, 8.9), xpd=TRUE)
-
-plot(x=as.integer(plot_dat$Month),y=plot_dat$Baggage_perc,type="o",
-   xaxt="n",xlab="", ylab="Baggage % ",lty=2, col=2, pch = 2,
-   ylim = c(min(res$Baggage_perc),max(res$Baggage_perc)))
-axis(1,at = seq(1,12),labels = levels(res$Month))
-title(paste(airline,"Baggage %"))   
-for(j in 1:length(years)){
-  plot_dat = res[res$Year == years[j],]
-  lines(x=as.integer(plot_dat$Month),
-        y=plot_dat$Baggage_perc,type="o",lty=j+2, col=j+2,pch=j+2)
+for(i in 1:length(airlines))
+{
+  airline = airlines[i]
+  data = baggage[baggage$Airline == airline,]
+  res = aggregate(data["Baggage_perc"], by=list(Month = data$Month, Year = data$Year), sum)
+  years = unique(data$Year)
+  plot_dat = res[res$Year == years[1],]
+  
+  #bottom,left,top,right margin
+  par(mar=c(7.1, 4.1, 3.1, 8.9), xpd=TRUE)
+  
+  plot(x=as.integer(plot_dat$Month),y=plot_dat$Baggage_perc,type="o",xaxt="n",xlab="", ylab="Baggage % ",lty=3, col=3, pch = 3,ylim = c(min(res$Baggage_perc),max(res$Baggage_perc)))
+  axis(1,at = seq(1,12),labels = levels(res$Month))
+  title(paste(airline,"Baggage %"))   
+  for(j in 2:length(years)){
+    plot_dat = res[res$Year == years[j],]
+    lines(x=as.integer(plot_dat$Month),y=plot_dat$Baggage_perc,type="o",lty=j+2, col=j+2,pch=j+2)
     
+  }
+  # add average line
+  perc_averaged= aggregate(res["Baggage_perc"], by=list(Date = res$Month), mean)
+  lines(x=as.integer(plot_dat$Month),y=perc_averaged$Baggage_perc, type="o",lty=1, col=1,pch=1)
+  
+  
+  legend("topright", inset=c(-0.2,0), legend=c("Average", "Regression", years), lty=1:(length(years)+2),col=1:(length(years)+2), title="Years")
+  
+  # add regression line
+  lm_perc = lm(perc_averaged$Baggage_perc~as.integer(plot_dat$Month))
+  clip(min(as.integer(plot_dat$Month))-0.48, max(as.integer(plot_dat$Month))-0.9, min(res$Baggage),max(res$Baggage_perc))
+  abline(lm_perc, lty = 2, col=2)
+  
 }
-# add average line
-perc_averaged= aggregate(res["Baggage_perc"], by=list(Date = res$Month), mean)
-lines(x=as.integer(plot_dat$Month),y=perc_averaged$Baggage_perc, type="o",lty=1, col=1,pch=1)
-
-
-legend("topright", inset=c(-0.43,0), legend=c("Average", "Regression", years), lty=1:(length(years)+2),col=1:(length(years)+2), title="Years")
-
-# add regression line
-lm_perc = lm(perc_averaged$Baggage_perc~as.integer(plot_dat$Month))
-clip(min(as.integer(plot_dat$Month))-0.48, 
-   max(as.integer(plot_dat$Month))-0.9, 
-   min(res$Baggage),max(res$Baggage_perc))
-abline(lm_perc, lty = 2, col=2)
-
-
-
 
 ## ------------------------------------------------------------------------
 airline = airlines[2]
