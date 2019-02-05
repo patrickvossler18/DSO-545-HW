@@ -1,37 +1,23 @@
----
-title: 'DSO 545: HW 1'
-author: "Bradley Rava, Patrick Vossler, Simeng Shao"
-date: "1/27/2019"
-output: pdf_document
----
-
-```{r setup, include=FALSE}
+## ----setup, include=FALSE------------------------------------------------
 knitr::opts_chunk$set(echo = FALSE)
 library(here)
 
-```
-# Case 1: Baggage Data
 
-Load the data:
-```{r}
+## ------------------------------------------------------------------------
 baggage = read.csv(here("HW1", "Baggage.csv"), header=T, stringsAsFactors = F)
 
 indus_med = read.csv(here("HW1","IndustryMedians.csv"),header=T)
 head(baggage)
-```
 
-Process data:
-```{r}
+## ------------------------------------------------------------------------
 baggage$Date = as.Date(paste0("02/",baggage$Date),"%d/%m/%Y")
 baggage$Month = factor(baggage$Month,
                        labels=c("Jan","Feb","Mar","Apr","May",
                                 "Jun","Jul","Aug","Sep",
                                 "Oct","Nov","Dec"))
 baggage$Airline = as.character(baggage$Airline)
-```
 
-## 1. Explore baggage complaints over time: create 3 time series plots for the variable *Baggage* by Date for each of the airlines separately.
-```{r}
+## ------------------------------------------------------------------------
 airlines = unique(baggage$Airline)
 for(i in 1:length(airlines)){
     airline = airlines[i]
@@ -42,23 +28,8 @@ for(i in 1:length(airlines)){
     title(paste(airline,"Baggage Complaints (2004-2010)"))
     
 }
-```
 
-## 2. Briefly describe what patterns you see in the plots
-In some of the plots we see a cyclical pattern with the number of baggage complaints increasing during the winter holiday travel season (November-January). There is often another spike in baggage complaints in the summer likely when families are going on summer vacations.
-
-* American Eagle
-    * We see that the cyclical yearly trend described above holds for American Eagle. Furthermore we see that there is an increase in the total number of complaints in 2006-2008 and then the number of complaints drops back down from 2009 onward.
-* Hawaiian Airlines
-    * Compared to American Eagle, Hawaiian Airlines has a smaller number of complaints each month. This is expected because Hawaiian Airlines is a smaller airline compared to American Eagle. Whereas American Eagle had a spike in baggage complaints during the winter holiday travel season, Hawaiian Airlines seems to have spikes in baggage complaints during the Spring and Summer. This perhaps could be because they see an influx of passengers wishing to travel to Hawaii during the Spring and Summer months.
-    * The most concerning trend for Hawaiian Airlines is the trend of larger spikes in each of the successive years, culminating with a large spike in baggage complaints during the 2010 holiday season.
-* United Airlines
-    * Unsurprisingly United Airlines has a larger number of baggage complaints overall which can be explained by its much larger size compared to the other two companies.
-    * Like American Eagle we see that United Airlines also experiences a surge in baggage claims during the holiday season. Additionally, it is interesting that both American Eagle and United Airlines have a spike in baggage complaints during 2006. Perhaps there was some external event that caused this for both airlines?
-    * Since both American Eagle and United Airlines provide a variety of flights to domestic destinations it is not surprising to see that they have similar baggage complaint patterns in the summer and winter months.
-
-## 3.
-```{r}
+## ------------------------------------------------------------------------
 airlines = unique(baggage$Airline)
 airline = airlines[1]
 data = baggage[baggage$Airline == airline,]
@@ -79,8 +50,8 @@ for(j in 1:length(years)){
 }
 legend("topright", inset=c(-0.2,0), legend=years, pch=1:length(years),lty=1:length(years),col=1:length(years), title="Years")
 
-```
-```{r}
+
+## ------------------------------------------------------------------------
 airline = airlines[2]
 data = baggage[baggage$Airline == airline,]
 res = aggregate(data["Baggage"], by=list(Month = data$Month, Year = data$Year), sum)
@@ -102,9 +73,8 @@ for(j in 1:length(years)){
 legend("topright", inset=c(-0.2,0), legend=years, pch=1:length(years),
        lty=1:length(years),col=1:length(years), title="Years")
 
-```
 
-```{r}
+## ------------------------------------------------------------------------
 airline = airlines[3]
 data = baggage[baggage$Airline == airline,]
 res = aggregate(data["Baggage"], by=list(Month = data$Month, Year = data$Year), sum)
@@ -126,18 +96,8 @@ for(j in 1:length(years)){
 legend("topright", inset=c(-0.2,0), legend=years, pch=1:length(years),
        lty=1:length(years),col=1:length(years), title="Years")
 
-```
 
-
-## 4. Describe the patterns in the plot
-For American Airlines we see that there is an increase in the number of overall complaints for the years 2005-2007 but that the number of overall baggage complaints decreases later in the time period from 2009-2010.
-
-For Hawaiian Airlines we see a large spike in baggage complaints in 2008 compared to the other years. Furthermore we see that the number of baggage complaints noticeably increases towards the end of 2010 in comparison to the other years.
-
-Of the three airlines, United Airlines has the most consistent number of baggage complaints year over year compared to the other airlines, except for 2006 where there is a larger number of total complaints. This mirrors American Airlines which saw an increase in total number of baggage complaints for the period between 2005-2007.
-
-## 5. Plot all three airline Baggage data by Date on one graph.
-```{r}
+## ------------------------------------------------------------------------
 # Maybe do this on the log scale?
 airlines = unique(baggage$Airline)
 airline = airlines[1]
@@ -166,55 +126,30 @@ for(i in 2:length(airlines)){
 legend("topright", inset=c(-0.075,0), legend=airlines, 
        pch=1:length(airlines),lty=1:length(airlines),col=1:length(airlines), title="Airlines")
 
-```
 
-## 6. Based on the graph in question 5., do some airlines have better baggage handling practices?
-According to the plot, Hawaiian line seems to have much smaller baggage complaints throughout 2004-2010, which has been below 50000. Other two lines, however, are above 50000.
-
-## 7.	Based on the graph in question 5., which airline has the best record? The worst?
-Based on the graph, Hawaiian has the best record, United has the worst record.
-
-
-## 8.	Based on the graph in question 5., are complaints getting better or worse over time?
-There is no clear pattern that the curves are going up or down, in fact they all once increase and fluctuate back to the level where they started with. So based on the graph the complaints are not getting better nor wose.
-
-## 9.	Are the conclusions, you have drawn based on the graphs of the raw data you created, accurate? Are there any potential factors that may distort your conclusions and should be taken into consideration?
-The conclusions are not necessarily accurate since we only looked at the number of baggage complains of the three airlines. Chances are that Hawaiian is a smaller airline and have way fewer passengers than United or American Eagle. So we look at the ratio of (# of complaints)/(# of boarded passengers), i.e., "baggage"/"enplaned" in our dataset.
-
-## 10.	Report the average of scheduled flights and the average of enplaned passengers by airline. 
-```{r}
+## ------------------------------------------------------------------------
 mean_scheduled = rep(0, length(unique(airlines)))
 names(mean_scheduled) = unique(airlines)
 for(i in 1:length(unique(airlines)))
 {
   mean_scheduled[i] = mean(baggage[baggage$Airline == airlines[i],6])
 }
-```
 
-```{r}
+## ------------------------------------------------------------------------
 mean_enplaned = rep(0, length(unique(airlines)))
 names(mean_enplaned) = unique(airlines)
 for(i in 1:length(unique(airlines)))
 {
   mean_enplaned[i] = mean(baggage[baggage$Airline == airlines[i],8])
 }
-```
 
-The average of scheduled flights are:
-```{r}
+## ------------------------------------------------------------------------
 mean_scheduled
-```
 
-The average of enplaned passengers are:
-```{r}
+## ------------------------------------------------------------------------
 mean_enplaned
-```
 
-## 11. What insights, ideas, and concerns does the data in the table in 10. provide you with?
-The number of scheduled planes and enplaned passengers of United and Hawaiian are not on the same scale. Again this confirms our concern in problem 9 that simply looking at the number of complains is not fair for assessing the baggage handling practices of these companies.
-
-## 12. Create **Baggage %** KPI that adjusts the total number of passenger complaints for size
-```{r}
+## ------------------------------------------------------------------------
 baggage$Baggage_perc = baggage$Baggage / baggage$Enplaned * 100
 
 mean_kpi = rep(0, length(unique(airlines)))
@@ -223,22 +158,13 @@ for(i in 1:length(unique(airlines)))
 {
   mean_kpi[i] = mean(baggage[baggage$Airline == airlines[i],9])
 }
-```
 
-The average Baggage % for each airline are:
-```{r}
+## ------------------------------------------------------------------------
 for(i in 1: length(unique(airlines)))
   print(paste(unique(airlines), round(mean_kpi*100,2),"%")[i])
 
-```
 
-## 13.	Do the results in question 12 support your previous conclusions? Briefly explain.
-The results in question 12 show that Hawaiian has the lowest **Baggage %**, United is the second; while American Eagle has the highest **Baggage %**. This result contradicts with our previous conclusions in that the worst baggage handling records belongs to American Eagle instead of United.
-
-## 14.	Superimpose all three time series on one graph to display Baggage % by Date.
-
-
-```{r}
+## ------------------------------------------------------------------------
 
 airlines = unique(baggage$Airline)
 airline = airlines[1]
@@ -263,11 +189,8 @@ for(i in 2:length(airlines)){
 }
 legend("topright", inset=c(-0.375,0), legend=airlines, pch=1:length(airlines),lty=1:length(airlines),col=1:length(airlines), title="Airlines")
 
-```
 
-## 15.	In addition to the graph in question 14., would plotting each series on a separate graph be beneficial and why? Create a graph to support your answer.  
-
-```{r}
+## ------------------------------------------------------------------------
 
 airlines = unique(baggage$Airline)
 airline = airlines[1]
@@ -287,8 +210,8 @@ dates = seq(as.Date("2004-01-02"), by = "month", along = res_ts)
 plot(res_ts,type="o",xaxt="n",xlab="Month", ylab="Number of Baggage %",lty=1, col=1, pch = 1,ylim=c(0,max(res$Baggage_perc)))+ axis(1, at = seq(tsp[1], tsp[2], along = res_ts), labels = format(dates, "%Y-%m"))
 title(paste0("Baggage % for ", airline,  " (2004-2010)"))
 
-```
-```{r}
+
+## ------------------------------------------------------------------------
 airline = airlines[2]
 perc_aggregated = aggregate(baggage["Baggage_perc"], by=list(Date = baggage$Date,Airline=baggage$Airline), sum)
 res = perc_aggregated[perc_aggregated$Airline == airline,]
@@ -306,9 +229,8 @@ dates = seq(as.Date("2004-01-02"), by = "month", along = res_ts)
 plot(res_ts,type="o",xaxt="n",xlab="Month", ylab="Number of Baggage %",lty=1, col=1, pch = 1,ylim=c(0,max(res$Baggage_perc)))+ axis(1, at = seq(tsp[1], tsp[2], along = res_ts), labels = format(dates, "%Y-%m"))
 title(paste0("Baggage % for ", airline,  " (2004-2010)"))
 
-```
 
-```{r}
+## ------------------------------------------------------------------------
 airline = airlines[3]
 perc_aggregated = aggregate(baggage["Baggage_perc"], by=list(Date = baggage$Date,Airline=baggage$Airline), sum)
 res = perc_aggregated[perc_aggregated$Airline == airline,]
@@ -326,18 +248,8 @@ dates = seq(as.Date("2004-01-02"), by = "month", along = res_ts)
 plot(res_ts,type="o",xaxt="n",xlab="Month", ylab="Number of Baggage %",lty=1, col=1, pch = 1,ylim=c(0,max(res$Baggage_perc)))+ axis(1, at = seq(tsp[1], tsp[2], along = res_ts), labels = format(dates, "%Y-%m"))
 title(paste0("Baggage % for ", airline,  " (2004-2010)"))
 
-```
 
-Plotting each series on a separate graph is beneficial because this way we can pay a closer look to how every curve fluctuated. In the previous plot, since the range for American Eagle is too big, it is hard to tell how the curve of Hawaiian changed over time.
-
-## 16.	Based on the analysis of  KPI Baggage %, have any of your conclusions drawn in questions 6. - 8. changed? Briefly discuss.
-The conclusion for the best service and worst service has been changed. If we look at the KPI Baggage %, we would find that Hawaiian still has the best service, whilst American Eagle has the worst service.
-
-How complaints are changing over time remains non-significant. For United the Baggage % level seems pretty stable; For American Eagle Baggage % seems to rise up and fall back to the begining level; for Hawaiian it seems that the Baggage % once seems to drop but at the end of 2010 it increases rapid to the highest level. Therefore, by the current data we cannot tell whether the complaints level are becoming better or worse.
-
-
-## 17. Superimpose time series plots of monthly averages of **Baggage %** by time for the three airlines
-```{r}
+## ------------------------------------------------------------------------
 
 airlines = unique(baggage$Airline)
 airline = airlines[1]
@@ -353,8 +265,8 @@ for(i in 2:length(airlines)){
     lines(res$Baggage_perc,type="o",lty=i, col=i,pch=i)
 }
 legend("topright", inset=c(-0.375,0), legend=airlines, pch=1:length(airlines),lty=1:length(airlines),col=1:length(airlines), title="Airlines")
-```
-```{r}
+
+## ------------------------------------------------------------------------
 airline = airlines[2]
 
 perc_averaged= aggregate(baggage["Baggage_perc"], by=list(Date = baggage$Month,Airline=baggage$Airline), mean)
@@ -368,8 +280,8 @@ for(i in 2:length(airlines)){
     lines(res$Baggage_perc,type="o",lty=i, col=i,pch=i)
 }
 legend("topright", inset=c(-0.375,0), legend=airlines, pch=1:length(airlines),lty=1:length(airlines),col=1:length(airlines), title="Airlines")
-```
-```{r}
+
+## ------------------------------------------------------------------------
 airline = airlines[3]
 
 perc_averaged= aggregate(baggage["Baggage_perc"], by=list(Date = baggage$Month,Airline=baggage$Airline), mean)
@@ -383,14 +295,8 @@ for(i in 2:length(airlines)){
     lines(res$Baggage_perc,type="o",lty=i, col=i,pch=i)
 }
 legend("topright", inset=c(-0.375,0), legend=airlines, pch=1:length(airlines),lty=1:length(airlines),col=1:length(airlines), title="Airlines")
-```
 
-## 18.	Discuss common patterns all three time series exhibit in question 17.
-The common patterns that all three series share are as follows:
-The Baggage % begins to drop during the first 4-5 months, then it will hit the highest point in June, and stay at a high level till August, then it will continue dropping before it soars in Nov.-Dec.
-
-## 19. Create a timeplot of **Baggage %**, add average line for **Baggage %** and a trendline of monthly average **Baggage %** for each airline.
-```{r}
+## ------------------------------------------------------------------------
 airlines = unique(baggage$Airline)
 airline = airlines[1]
 data = baggage[baggage$Airline == airline,]
@@ -428,9 +334,8 @@ abline(lm_perc, lty = 2, col=2)
 
 
 
-```
 
-```{r}
+## ------------------------------------------------------------------------
 airline = airlines[2]
 data = baggage[baggage$Airline == airline,]
 res = aggregate(data["Baggage_perc"], by=list(Month = data$Month, Year = data$Year), sum)
@@ -466,9 +371,8 @@ clip(min(as.integer(plot_dat$Month))-0.48,
 abline(lm_perc, lty = 2, col=2)
 
 
-```
 
-```{r}
+## ------------------------------------------------------------------------
 airline = airlines[3]
 data = baggage[baggage$Airline == airline,]
 res = aggregate(data["Baggage_perc"], by=list(Month = data$Month, Year = data$Year), sum)
@@ -504,118 +408,67 @@ clip(min(as.integer(plot_dat$Month))-0.48,
 abline(lm_perc, lty = 2, col=2)
 
 
-```
 
-
-For each airline, I superimposed the follow curves: 
-  * "Average": The average monthly Baggage % among the 7 years (black solid curve)
-  * "Regression": The linear regression of the average monthly Baggage % (red curve), using *lm()* function
-  * 7 years of monthly Baggage %
-
-
-## 20.	Prepare a brief (one paragraph) executive summary of your findings.  
-There is an increase in the number of baggage complaints during the summer and winter holiday holiday seasons for all three airline carriers. These holiday season spikes in complaints is relatively consistent across the different years. When we looked at the time series plots using the KPI of Baggage % we saw that the Baggage % begins to drop during the first 4-5 months, then it will hit the highest point in June, and stay at a high level till August, then it will continue dropping before it soars in Nov.-Dec.
-
-# Case 2: CEO Compensation
-
-```{r case 2 load data}
+## ----case 2 load data----------------------------------------------------
 x <- read.table(here("HW1", "CEOcompensation.txt"), header = T, sep = "\t", quote = "\"", row.names = 1)
-```
 
-## Question 1: What is the number of female CEO's?
-
-```{r question 1}
+## ----question 1----------------------------------------------------------
 num.ceo.f <- length(x$CEO[x$Gender == "F"])
 print(paste("The number of female CEO's is", num.ceo.f))
-```
 
-## Question 2: What is the age of the youngest CEO?
-
-```{r question 2}
+## ----question 2----------------------------------------------------------
 age.ceo.min <- min(x$Age)
 print(paste("The age of the youngest CEO is", age.ceo.min))
-```
 
-## Question 3: What is the age of the oldest CEO?
-
-```{r question 3}
+## ----question 3----------------------------------------------------------
 age.ceo.max <- max(x$Age)
 print(paste("The age of the oldest CEO is", age.ceo.max))
-```
 
-## Question 4: What is the average age of a CEO?
-
-```{r question 4}
+## ----question 4----------------------------------------------------------
 age.ceo.avg <- round(mean(x$Age), 2)
 print(paste("The average age of a CEO is", age.ceo.avg))
-```
 
-## Question 5: What is the total CEO 2008 salary?
-```{r question 5}
+## ----question 5----------------------------------------------------------
 tot.2008.sal <- sum(x$X2008.Salary)
 print(paste("The total CEO 2008 salary is", paste0(tot.2008.sal,"0"), "million"))
-```
 
-## Question 6: How many CEOs have joined a company as a CEO? (Hint: CEOs can always be founders. Founders can’t always be CEOs)
-
-```{r question 6}
+## ----question 6----------------------------------------------------------
 ## Here we claim that a CEO joined the company as a CEO if the number of years she was at the company equals the number of years she has been CEO.
 
 yearCheck <- sum(x$Years.as.company.CEO == x$Years.with.company)
 print(paste(yearCheck, "CEO's joined a company as a CEO"))
-```
 
-## Question 7: What is the average amount of time a CEO worked for a company before becoming a CEO? (Use two decimal digit precision)
-
-```{r question 7}
+## ----question 7----------------------------------------------------------
 beforeCEO <- round(mean(x$Years.with.company - x$Years.as.company.CEO), 2)
 print(paste("The average amount of time a CEO worked for a company before becoming a CEO is", beforeCEO, "years"))
-```
 
-## Question 8: Which industry in the data set has largest number CEO’s?
-
-```{r question 8}
+## ----question 8----------------------------------------------------------
 numCEO <- aggregate(x$CEO, list(Industry = x$Industry), FUN = length)
 industry.max.ceo <- numCEO[[1]][which(numCEO[[2]] == max(numCEO[[2]]))]
 print(paste("The industry with the largest number of CEO's is", industry.max.ceo))
-```
 
-## Question 9: What is the average CEO 2008 Compensation? Note that 2008 compensation for a CEO consists of a total four components: Salary, Bonus, other (including vested restricted stock grants, LTIP (long-term incentive plan) payouts, and perks), and stock gains. (Use two decimal digit precision)
-
-```{r question 9}
+## ----question 9----------------------------------------------------------
 totCompensation <- round(mean(x$X2008.Salary + 
                                   x$X2008.Bonus + x$X2008.Other +
                                   x$X2008.Stock.gains), 2)
 print(paste("The average CEO 2008 Compensation is", totCompensation, "million"))
-```
 
-## Question 10: Which CEO did get paid the largest compensation amount in 2008?
-
-```{r question 10}
+## ----question 10---------------------------------------------------------
 ceoCompensation <- x$X2008.Salary + x$X2008.Bonus + x$X2008.Other + x$X2008.Stock.gains
 maxCompensation <- which(ceoCompensation == max(ceoCompensation))
 print(paste("The CEO with the largest compensation amount in 2008 is", x$CEO[maxCompensation]))
-```
 
-## Question 11: What is the corresponding amount? (Use two decimal digit precision)
-
-```{r question 11}
+## ----question 11---------------------------------------------------------
 ceoCompensation <- x$X2008.Salary + x$X2008.Bonus + x$X2008.Other + x$X2008.Stock.gains
 print(paste("The corresponding amount is", max(ceoCompensation), "million"))
-```
 
-## Question 12: Which industry does correspond to the second largest total CEO compensation in 2008? (Hint:check sort(), order () functions).
-
-```{r question 12}
+## ----question 12---------------------------------------------------------
 ceoCompensation <- x$X2008.Salary + x$X2008.Bonus + x$X2008.Other + x$X2008.Stock.gains
 secondMaxCompensation <- which(ceoCompensation == tail(sort(ceoCompensation), 2)[1])
 print(paste("The industry with the second largest total CEO compensation is",
             x$Industry[secondMaxCompensation]))
-```
 
-## Question 13: Consider the following age groups: [45 – 50), [50 – 55), [55 – 60), [60 – 70), and [70 or more). Analyze age groups by industry and determine which age group corresponds to largest CEO average salary in 2008? Hint: 1. left end point is included; 2. nested if helps assign age category
-
-```{r question 13}
+## ----question 13---------------------------------------------------------
 ageGroups <- vector(mode="numeric", length=nrow(x))
 ageGroups[which(x$Age >= 45 & x$Age < 50)] <- 1
 ageGroups[which(x$Age >= 50 & x$Age < 55)] <- 2
@@ -647,29 +500,22 @@ x$percentDiff <- sapply(1:nrow(z), function(i) {
   indMed <- y$Total.compensation[which(y$Industry == z$industry[i])]
   return( (compensation - indMed) / indMed*100)
 })
-```
 
-```{r}
+## ------------------------------------------------------------------------
 ## Look at the percent difference for each CEO
 print(round(x$percentDiff,3))
 hist(x$percentDiff, main = "Percent Difference for each CEO", xlab = "Percent Difference")
-```
 
-## Question 14: How many CEO’s have received 100% or larger compensation relative to their respective median compensation?
-
-```{r question 14}
+## ----question 14---------------------------------------------------------
 numLarger <- length(which(x$percentDiff > 100))
 cat(paste("The number of CEO's that recieved 100% or larger
           compensation relative to their respective median compensation is", numLarger))
-```
 
-## Question 15: Is the following formula always true? 
-
-```{r question 15}
+## ----question 15---------------------------------------------------------
 y$totalMedianCompensation <- y$Salary + y$Bonus + y$Other + y$Stock.Gains
 
 cat(paste("There are a total of",
             length(which(y$totalMedianCompensation != y$Total.compensation)), 
             "where the total median compensation formula
 does not match our given total median compensation. This means the formula is not always true."))
-```
+
