@@ -6,7 +6,7 @@ output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = T)
+knitr::opts_chunk$set(echo = F)
 library(here)
 
 ```
@@ -341,37 +341,6 @@ How complaints are changing over time remains non-significant. For United the Ba
 
 airlines = unique(baggage$Airline)
 airline = airlines[1]
-
-perc_averaged= aggregate(baggage["Baggage_perc"], by=list(Date = baggage$Month,Airline=baggage$Airline), mean)
-res = perc_averaged[perc_averaged$Airline == airline,]
-plot(x=1:12, y=res$Baggage_perc, type="o",xlab="Month", ylab="Month Average of Baggage %",lty=1, col=1, pch = 1,ylim= c(0,max(perc_averaged$Baggage_perc)))
-
-title("Monthly Averages of Baggage % for all 3 Airlines (2004-2010)")
-for(i in 2:length(airlines)){
-    airline = airlines[i]
-    res = perc_averaged[perc_averaged$Airline == airline,]
-    lines(res$Baggage_perc,type="o",lty=i, col=i,pch=i)
-}
-legend("topright", inset=c(-0.375,0), legend=airlines, pch=1:length(airlines),lty=1:length(airlines),col=1:length(airlines), title="Airlines")
-```
-```{r}
-airline = airlines[2]
-
-perc_averaged= aggregate(baggage["Baggage_perc"], by=list(Date = baggage$Month,Airline=baggage$Airline), mean)
-res = perc_averaged[perc_averaged$Airline == airline,]
-plot(x=1:12, y=res$Baggage_perc, type="o",xlab="Month", ylab="Month Average of Baggage %",lty=1, col=1, pch = 1,ylim= c(0,max(perc_averaged$Baggage_perc)))
-
-title("Monthly Averages of Baggage % for all 3 Airlines (2004-2010)")
-for(i in 2:length(airlines)){
-    airline = airlines[i]
-    res = perc_averaged[perc_averaged$Airline == airline,]
-    lines(res$Baggage_perc,type="o",lty=i, col=i,pch=i)
-}
-legend("topright", inset=c(-0.375,0), legend=airlines, pch=1:length(airlines),lty=1:length(airlines),col=1:length(airlines), title="Airlines")
-```
-```{r}
-airline = airlines[3]
-
 perc_averaged= aggregate(baggage["Baggage_perc"], by=list(Date = baggage$Month,Airline=baggage$Airline), mean)
 res = perc_averaged[perc_averaged$Airline == airline,]
 plot(x=1:12, y=res$Baggage_perc, type="o",xlab="Month", ylab="Month Average of Baggage %",lty=1, col=1, pch = 1,ylim= c(0,max(perc_averaged$Baggage_perc)))
