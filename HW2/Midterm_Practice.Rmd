@@ -1,0 +1,91 @@
+---
+title: "DSO 545 Midterm Practice Problems"
+author: "Patrick Vossler"
+date: "2/18/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+library(here)
+library(dplyr)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Read in the data
+```{r}
+grade_book = read.table(file = here("HW2/Gradebook.txt"),sep = "\t",header = T)
+additional_info1 = read.table(file = here("HW2/GradebookAdditionalInfo1.txt"),sep = "\t",header = T)
+additional_info2 = read.table(file = here("HW2/GradebookAdditionalInfo2.txt"),sep = "\t",header = T)
+additional_info3 = read.table(file = here("HW2/GradebookAdditionalInfo3.txt"),sep = "\t",header = T)
+additional_info4 = read.table(file = here("HW2/GradebookAdditionalInfo4.txt"),sep = "\t",header = T)
+```
+
+#1,2. Which assignment has the lowest average?
+```{r}
+grade_book %>%select(Quiz.1:Final.Exam) %>% summarize_all(funs(mean))
+```
+We see that the midterm had the lowest average at 67.61
+
+#3. Display the lowest score of all assignments for each major
+```{r}
+grade_book %>% select(Major:Final.Exam) %>% group_by(Major) %>% summarize_all(funs(min))
+```
+
+# 4,5. Which assignment has the highest median?
+```{r}
+grade_book %>%select(Quiz.1:Final.Exam) %>% summarize_all(funs(median))
+```
+Project 2 has the highest median at 95
+
+# 6. Highest score of all assignments for each major
+```{r}
+grade_book %>% select(Major:Final.Exam) %>% group_by(Major) %>% summarize_all(funs(max))
+```
+
+# 7,8. Which quiz has the largest number of zeros?
+```{r}
+grade_book %>% select(Quiz.1:Quiz.5) %>% summarise_all(funs(sum(.==0)))
+```
+
+Quiz 4 has the largest number of zeros at 20
+
+# 9. Calculate average quiz score for each student. How many students have average score >=80 but <90
+```{r}
+grade_book  %>% select(Quiz.1:Quiz.5) %>% mutate(AverageScore = rowMeans(.)) %>% filter(AverageScore >= 80 & AverageScore < 90) %>% summarize(num_rows = n())
+```
+# 10. Create a tibble that displays average of each assignment for each major
+```{r}
+grade_book %>% select(Major,Project.1:Team.Project) %>% group_by(Major) %>% summarize_all(funs(mean))
+```
+
+# 11. On a 0 to 100 percent scale calculate the average final grade in the course
+```{r}
+grade_book %>% select(Quiz.1:Final.Exam) %>% summarise_all(funs(mean)) %>% summarize(average_grade = (Quiz.1 + Quiz.2 + Quiz.3 + Quiz.4 + Quiz.5 - min(Quiz.1:Quiz.5))*0.03 + (Project.1 + Project.2)*0.2 + (0.15 * Team.Project) + (0.2 * Midterm) + (Final.Exam * 0.33) )
+```
+
+
+Practice Problem 3
+load in the data
+```{r}
+prob3_data = read.csv(here("HW2/PracticeProblem3Data.csv"))
+prob3_additional = read.csv(here("HW2/AdditionalInfo.csv"))
+```
+
+Daily average number of workers
+```{r}
+prob3_data %>% mutate(total_num_workers = Num_Workers_Direct + Num_Workers_Indirect) %>% summarize(mean(total_num_workers))
+```
+On how many days does the number of indirect workers exceed the number of direct workers
+```{r}
+prob3_data %>% filter( Num_Workers_Indirect > Num_Workers_Direct) %>% summarize(n())
+```
+
+```{r}
+prob3_data = inner_join(prob3_data,prob3_additional,by = "Plant")
+prob3_data = prob3_data %>% mutate(Labor_Cost_Direct_USD =Labor_Costs_Direct/Exchange_Rate, Labor_Costs_Indirect_USD = Labor_Costs_Indirect/Exchange_Rate) %>% mutate(Labor_Cost_USD = Labor_Cost_Direct_USD + Labor_Costs_Indirect_USD)
+```
+
+```{r}
+prob3_data = 
+```
+
