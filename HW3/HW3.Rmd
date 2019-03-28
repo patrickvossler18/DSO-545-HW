@@ -1,6 +1,6 @@
 ---
-title: "HW 3"
-author: "Patrick Vossler"
+title: "DSO 545 HW 3"
+author: "Bradley Rava, Simeng Shao, Patrick Vossler"
 date: "3/19/2019"
 output: pdf_document
 ---
