@@ -18,32 +18,49 @@ library(here)
 
 ## Download data from wikipedia
 ```{r}
-url = read_html("https://en.wikipedia.org/wiki/List_of_Presidents_of_the_United_States_by_previous_experience")
-pres_table = url %>% html_nodes("table.wikitable") %>% .[[1]] %>% html_table()
-pres_table$State = pres_table$`State[7]`
-pres_table$State = stringr::str_remove(pres_table$State,"\\[\\d+\\](\\[\\d+\\])?")
-colnames(pres_table) = c("V1", "V2","President",colnames(pres_table)[4:length(colnames(pres_table))])
-
-state_count = pres_table %>% select(President,State) %>% group_by(State) %>% summarize(state_counts = n())
-state_count$State = tolower(state_count$State)
-states <- map_data("state")
-full_data = left_join(states,state_count,by = c("region"="State"))
-full_data$state_counts[is.na(full_data$state_counts)] = 0
-
-
-state_base <- ggplot(data = states, mapping = aes(x = long, y = lat, group = group)) + geom_polygon(fill="white",color="black")
-
-
-state_base +
-  geom_polygon(data = full_data, aes(fill = state_counts)) +
-    geom_text(data= (states %>% group_by(region) %>%
-                  summarize(lat=mean(c(max(lat),min(lat))),
-                            long = mean(c(max(long),min(long)))) %>% 
-                  left_join(state_count, by=c("region" ="State")) %>%
-                  filter(!is.na(state_counts))),
-              aes(x=long,y=lat,label = state_counts),inherit.aes = F)+ 
-                  scale_fill_gradient(low="white",high="darkred")+theme_void()
- 
+url = read_html(
+    "https://en.wikipedia.org/wiki/List_of_Presidents_of_the_United_States_by_previous_experience"
+    )
+    pres_table = url %>% html_nodes("table.wikitable") %>% .[[1]] %>% html_table()
+    pres_table$State = pres_table$`State[7]`
+    pres_table$State = stringr::str_remove(pres_table$State, "\\[\\d+\\](\\[\\d+\\])?")
+    colnames(pres_table) = c("V1", "V2", "President", colnames(pres_table)[4:length(colnames(pres_table))])
+    
+    state_count = pres_table %>% select(President, State) %>% group_by(State) %>% summarize(state_counts = n())
+    state_count$State = tolower(state_count$State)
+    states <- map_data("state")
+    full_data = left_join(states, state_count, by = c("region" = "State"))
+    full_data$state_counts[is.na(full_data$state_counts)] = 0
+    
+    
+    state_base <-
+    ggplot(data = states,
+    mapping = aes(x = long, y = lat, group = group)) + geom_polygon(fill =
+    "white", color = "black")
+    
+    
+    state_base +
+    geom_polygon(data = full_data, aes(fill = state_counts)) +
+    geom_text(
+    data = (
+    states %>% group_by(region) %>%
+    summarize(lat = mean(c(max(
+    lat
+    ), min(
+    lat
+    ))),
+    long = mean(c(
+    max(long), min(long)
+    ))) %>%
+    left_join(state_count, by = c("region" = "State")) %>%
+    filter(!is.na(state_counts))
+    ),
+    aes(x = long, y = lat, label = state_counts),
+    inherit.aes = F
+    ) +
+    scale_fill_gradient(low = "white", high = "darkred") +
+    theme_void()
+    
 
 
  
@@ -51,43 +68,114 @@ state_base +
 
 #2 Transportation Data
 ```{r}
-trans_data = read.table(here::here("HW3/TransportationDemand.txt"),header = T,sep = "\t")
-trans_data$Time.Stamp = parse_date_time(trans_data$Time.Stamp,"%m/%d/%Y %I:%M %p",tz = "America/Santiago")
-trans_data$Week = factor(week(trans_data$Time.Stamp))
-trans_data$Hour = as_datetime(hm(paste0(hour(trans_data$Time.Stamp),":", minute(trans_data$Time.Stamp))))
-trans_data$Day = wday(trans_data$Time.Stamp,label=T)
-noon = trans_data$Hour[which(as.numeric(trans_data$Hour) / 3600 == 12.00)[1]]
-
-ggplot(trans_data,aes(x=Hour,y=DEMAND,color=Week)) + geom_line() + geom_point() +
-    facet_wrap(.~Day, scales = "free_y")  + theme_bw() + theme(legend.position="top") + labs(title="Number of Passengers arriving at Santiago terminal") + scale_x_datetime(name = "",date_labels ="%H", date_breaks =  "1 hours" ) + geom_vline(xintercept = noon ,linetype=4, colour="red") +
-    geom_text(data = trans_data %>% group_by(Day) %>% summarize(Hour=trans_data$Hour[which(as.numeric(trans_data$Hour) / 3600 == 12.00)[1]],DEMAND=max(DEMAND)-.15*max(DEMAND)),
-            aes(label = "PM"),colour="blue", angle=90, vjust = 1.5) +
-    geom_text(data = trans_data %>% group_by(Day) %>% summarize(Hour=trans_data$Hour[which(as.numeric(trans_data$Hour) / 3600 == 12.00)[1]],DEMAND=max(DEMAND)-.15*max(DEMAND)),
-            aes(label = "AM"),colour="red", angle=90, vjust = -0.5)
+trans_data = read.table(here::here("HW3/TransportationDemand.txt"),
+                        header = T,
+                        sep = "\t")
+                        trans_data$Time.Stamp = parse_date_time(trans_data$Time.Stamp, "%m/%d/%Y %I:%M %p", tz = "America/Santiago")
+                        trans_data$Week = factor(week(trans_data$Time.Stamp))
+                        trans_data$Hour = as_datetime(hm(paste0(
+                        hour(trans_data$Time.Stamp),
+                        ":",
+                        minute(trans_data$Time.Stamp)
+                        )))
+                        trans_data$Day = wday(trans_data$Time.Stamp, label = T)
+                        noon = trans_data$Hour[which(as.numeric(trans_data$Hour) / 3600 == 12.00)[1]]
+                        
+                        ggplot(trans_data, aes(x = Hour, y = DEMAND, color = Week)) + geom_line() + geom_point() +
+                        facet_wrap(. ~ Day, scales = "free_y")  + theme_bw() + theme(legend.position = "top") + labs(title =
+                        "Number of Passengers arriving at Santiago terminal") + scale_x_datetime(name = "",
+                        date_labels = "%H",
+                        date_breaks =  "1 hours") + geom_vline(xintercept = noon ,
+                        linetype = 4,
+                        colour = "red") +
+                        geom_text(
+                        data = trans_data %>% group_by(Day) %>% summarize(
+                        Hour = trans_data$Hour[which(as.numeric(trans_data$Hour) / 3600 == 12.00)[1]],
+                        DEMAND = max(DEMAND) - .15 * max(DEMAND)
+                        ),
+                        aes(label = "PM"),
+                        colour = "blue",
+                        angle = 90,
+                        vjust = 1.5
+                        ) +
+                        geom_text(
+                        data = trans_data %>% group_by(Day) %>% summarize(
+                        Hour = trans_data$Hour[which(as.numeric(trans_data$Hour) / 3600 == 12.00)[1]],
+                        DEMAND = max(DEMAND) - .15 * max(DEMAND)
+                        ),
+                        aes(label = "AM"),
+                        colour = "red",
+                        angle = 90,
+                        vjust = -0.5
+                        )
 
 ```
 # 3
 ```{r}
 
-ggplot(trans_data,aes(x=Hour,y=DEMAND,color=Week)) + geom_line() + geom_point() +
-    facet_wrap(.~Day, scales = "free_y",ncol = 1,strip.position="right")  + theme_bw() + theme(legend.position="top") + labs(title="Number of Passengers arriving at Santiago terminal") + scale_x_datetime(name = "",date_labels ="%H", date_breaks =  "1 hours" ) + geom_vline(xintercept = noon ,linetype=4, colour="red") +
-    geom_text(data = trans_data %>% group_by(Day) %>% summarize(Hour=trans_data$Hour[which(as.numeric(trans_data$Hour) / 3600 == 12.00)[1]],DEMAND=max(DEMAND)-.12*max(DEMAND)),
-            aes(label = "PM"),colour="blue", hjust=-0.1) +
-    geom_text(data = trans_data %>% group_by(Day) %>% summarize(Hour=trans_data$Hour[which(as.numeric(trans_data$Hour) / 3600 == 12.00)[1]],DEMAND=max(DEMAND)-.12*max(DEMAND)),
-            aes(label = "AM"),colour="red",hjust=1)
+ggplot(trans_data, aes(x = Hour, y = DEMAND, color = Week)) + geom_line() + geom_point() +
+    facet_wrap(. ~ Day,
+    scales = "free_y",
+    ncol = 1,
+    strip.position = "right")  + theme_bw() + theme(legend.position = "top") + labs(title =
+    "Number of Passengers arriving at Santiago terminal") + scale_x_datetime(name = "",
+    date_labels = "%H",
+    date_breaks =  "1 hours") + geom_vline(xintercept = noon ,
+    linetype = 4,
+    colour = "red") +
+    geom_text(
+    data = trans_data %>% group_by(Day) %>% summarize(
+    Hour = trans_data$Hour[which(as.numeric(trans_data$Hour) / 3600 == 12.00)[1]],
+    DEMAND = max(DEMAND) - .12 * max(DEMAND)
+    ),
+    aes(label = "PM"),
+    colour = "blue",
+    hjust = -0.1
+    ) +
+    geom_text(
+    data = trans_data %>% group_by(Day) %>% summarize(
+    Hour = trans_data$Hour[which(as.numeric(trans_data$Hour) / 3600 == 12.00)[1]],
+    DEMAND = max(DEMAND) - .12 * max(DEMAND)
+    ),
+    aes(label = "AM"),
+    colour = "red",
+    hjust = 1
+    )
 
 
 ```
 
 # 4
 ```{r}
-ggplot(trans_data,aes(x=Hour,y=DEMAND,color=Week)) + geom_line() + geom_point() +
-    facet_wrap(.~Day,nrow = 1,strip.position="top")  + theme_bw() + theme(legend.position="top") + labs(title="Number of Passengers arriving at Santiago terminal") + scale_x_datetime(name = "",date_labels ="%H", date_breaks =  "1 hours" ) + geom_vline(xintercept = noon ,linetype=4, colour="red") +
-    geom_text(data = trans_data %>% group_by(Day) %>% summarize(Hour=trans_data$Hour[which(as.numeric(trans_data$Hour) / 3600 == 12.00)[1]],DEMAND=max(DEMAND)-.12*max(DEMAND)),
-            aes(label = "PM"),colour="blue", hjust=-0.1) +
-    geom_text(data = trans_data %>% group_by(Day) %>% summarize(Hour=trans_data$Hour[which(as.numeric(trans_data$Hour) / 3600 == 12.00)[1]],DEMAND=max(DEMAND)-.12*max(DEMAND)),
-            aes(label = "AM"),colour="red",hjust=1)
-
+ggplot(trans_data, aes(x = Hour, y = DEMAND, color = Week)) + geom_line() + geom_point() +
+    facet_wrap(. ~ Day, nrow = 1, strip.position = "top")  + theme_bw() + theme(legend.position =
+    "top") + labs(title = "Number of Passengers arriving at Santiago terminal") + scale_x_datetime(name = "",
+    date_labels = "%H",
+    date_breaks =  "1 hours") + geom_vline(xintercept = noon ,
+    linetype = 4,
+    colour = "red") +
+    
+    geom_text(
+    data = trans_data %>%
+    group_by(Day) %>%
+    summarize(
+    Hour = trans_data$Hour[which(as.numeric(trans_data$Hour) / 3600 == 12.00)[1]],
+    DEMAND = max(DEMAND) - .12 * max(DEMAND)
+    ),
+    aes(label = "PM"),
+    colour = "blue",
+    hjust = -0.1
+    ) +
+    geom_text(
+    data = trans_data %>% group_by(Day) %>% summarize(
+    Hour = trans_data$Hour[which(as.numeric(trans_data$Hour) / 3600 == 12.00)[1]],
+    DEMAND = max(DEMAND) - .12 * max(DEMAND)
+    ),
+    aes(label = "AM"),
+    colour = "red",
+    hjust = 1
+    )
+    
 ```
 
 
