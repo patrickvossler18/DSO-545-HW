@@ -55,7 +55,7 @@ url = read_html(
     inherit.aes = F
     ) +
     scale_fill_gradient(low = "white", high = "darkred") +
-    theme_void()
+    theme_void() + labs(fill="Number of Presidents")
     
 
 
