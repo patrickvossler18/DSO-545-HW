@@ -175,3 +175,40 @@ ggplot(trans_data, aes(x = Hour, y = DEMAND, color = Week)) + geom_line() + geom
 ```
 
 
+# 5
+```{r}
+flights = read.csv(here::here("HW3/FlightDelays.csv"),
+                        header = T)
+colnames(flights)
+# CARRIER, ORIGIN are already factors
+
+flights$DAY_WEEK = factor(recode(flights$DAY_WEEK, 
+       "1"="Mon",
+       "2"="Tue",
+       "3"="Wed",
+       "4"="Thu",
+       "5"="Fri",
+       "6"="Sat",
+       "7"="Sun"), levels = c("Wed", "Mon", "Tue", "Thu", "Fri", "Sat", "Sun"))
+
+print(levels(flights$ORIGIN))
+flights$ORIGIN = factor(flights$ORIGIN, levels(flights$ORIGIN)[c(3,1,2)])
+
+
+flights_count = flights %>% select(CARRIER, ORIGIN, DAY_WEEK) %>% group_by(ORIGIN, CARRIER, DAY_WEEK) %>% summarize(flights_count = n())
+
+flights_delayed = flights %>% select(CARRIER, ORIGIN, DAY_WEEK, Flight.Status) %>% group_by(ORIGIN, CARRIER, DAY_WEEK) %>% filter(Flight.Status=="delayed") %>% summarize(flights_delayed = n())
+
+flights_freq = left_join(flights_count, flights_delayed, by = c("CARRIER","ORIGIN","DAY_WEEK"))
+flights_delay_df = flights_freq %>% mutate(delay_freq = flights_delayed/flights_count) %>% select(CARRIER, ORIGIN, DAY_WEEK, delay_freq) %>% data.frame()
+
+
+
+
+ggplot(data = flights_delay_df, mapping = aes(x=DAY_WEEK, y=CARRIER, fill = delay_freq))+ 
+  geom_tile() +
+  facet_grid(vars(ORIGIN), scales = "free_y", space = "free_y") +
+  scale_fill_gradient(name = "value", low = "white", high = "dark red",na.value = "white") 
+  
+```
+
